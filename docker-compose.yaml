@@ -1,3 +1,6 @@
+volumes:
+  prometheus_data: {}
+
 services:
   vector:
     image: timberio/vector:nightly-debian
@@ -6,10 +9,22 @@ services:
       - "--config-dir"
       - "/etc/vector"
     volumes:
-      - ./vector/vector.yaml:/etc/vector/vector.yaml:rw
+      - ./vector/vector.yaml:/etc/vector/vector.yaml:ro
       - ./vector/logs:/etc/vector/logs/:rw
-    ports:
-      - "9090:9090"
     network_mode: "host"
     restart: always
 
+  prometheus:
+    image: prom/prometheus:v2.53.1
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+      - "--web.enable-admin-api"
+    ports:
+      - "9090:9090"
+    restart: always
