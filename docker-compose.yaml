@@ -1,0 +1,15 @@
+services:
+  vector:
+    image: timberio/vector:nightly-debian
+    read_only: false
+    command:
+      - "--config-dir"
+      - "/etc/vector"
+    volumes:
+      - ./vector/vector.yaml:/etc/vector/vector.yaml:rw
+      - ./vector/logs:/etc/vector/logs/:rw
+    ports:
+      - "9090:9090"
+    network_mode: "host"
+    restart: always
+

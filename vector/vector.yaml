@@ -1,0 +1,294 @@
+api:
+  enabled: true
+
+sources:
+  metrics:
+    type: "file"
+    include:
+      - /etc/vector/logs/example_logs*
+
+transforms:
+  initial_log_parse:
+    type: remap
+    inputs:
+      - metrics
+    source: |-
+      parsed_json = parse_json!(.message)
+      
+      metrics = parsed_json.metrics
+      metricFamily = parsed_json.metricFamily
+      
+      del(.message)
+      del(.metrics)
+      del(._line)
+      del(.componentName)
+      del(.cycleTimestampMS)
+      del(.dcmID)
+      del(.deviceItemID)
+      del(.headers)
+      del(.message_key)
+      del(.metricFamily)
+      del(.metricFamilyDisplayName)
+      del(.offset)
+      del(.partition)
+      del(.pollGroupID)
+      del(.pollRateMS)
+      del(.readTimestampMS)
+      del(.source_type)
+      del(.itemID)
+      del(.tags)
+      del(.tenantID)
+      del(.version)
+      
+      if metricFamily == "NormalizedPortInfo" {
+          .availability = metrics.Availability
+          .bitsIn = metrics.BitsIn
+          .bitsPerSecondIn = metrics.BitsPerSecondIn
+          .bitsOut = metrics.BitsOut
+          .bitsPerSecondOut = metrics.BitsPerSecondOut
+          .utilizationIn = metrics.UtilizationIn
+          .utilizationOut = metrics.UtilizationOut
+      }
+      .metricFamily = metricFamily
+
+  #      } else if .metricFamily == "NormalizedMemoryInfo" {
+#          .CPUMemoryKernelUsage = metrics.CPUMemoryKernelUsage
+#          .Free = metrics.Free
+#          .MemoryCommitted = metrics.MemoryCommitted
+#          .Total = metrics.Total
+#          .Used = metrics.Used
+#          .Utilization = metrics.Utilization
+#      } else if .metricFamily == "NormalizedCPUInfo" {
+#          .cpuBusyPercInInterruptCpmCPUMonInterval = metrics.cpuBusyPercInInterruptCpmCPUMonInterval
+#          .cpuBusyPercInLastCpmCPUMonInterval = metrics.cpuBusyPercInLastCpmCPUMonInterval
+#          .cpuIdleUtilization = metrics.cpuIdleUtilization
+#          .cpuSystemUtilization = metrics.cpuSystemUtilization
+#          .cpuUsageMonitoringInterval = metrics.cpuUsageMonitoringInterval
+#          .cpuUserUtilization = metrics.cpuUserUtilization
+#          .CPUUtilizationAverage5Seconds = metrics.CPUUtilizationAverage5Seconds
+#          .CPUUtilizationLastMin = metrics.CPUUtilizationLastMin
+#          .SysCPULoadLast5Minutes = metrics.SysCPULoadLast5Minutes
+#          .Utilization = metrics.Utilization
+#      } else if .metricFamily == "NormalizedReachabilityInfo" {
+#          .AvgResponse = metrics.AvgResponse
+#          .Reachability = metrics.Reachability
+#      } else if .metricFamily == "NormalizedAvailabilityInfo" {
+#          .AvgResponse = metrics.Availability
+#          .Reachability = metrics.Reachability
+#      } else if .metricFamily == "NormalizedPartitionsInfo" {
+#          .Capacity = metrics.Capacity
+#          .Free = metrics.Free
+#          .PercentFree = metrics.PercentFree
+#          .PercentUsed = metrics.PercentUsed
+#          .Used = metrics.Used
+#      } else if .metricFamily == "NormalizedQosClassMapInfo" {
+#          .AllocatedBandwidth = metrics.AllocatedBandwidth
+#          .BandwidthEnabled = metrics.BandwidthEnabled
+#          .BitRateDrops = metrics.BitRateDrops
+#          .CongestionDiscardedPackets = metrics.CongestionDiscardedPackets
+#          .DiscardedPackets = metrics.DiscardedPackets
+#          .DiscardRate = metrics.DiscardRate
+#          .PctQoSMechanismDiscard = metrics.PctQoSMechanismDiscard
+#          .PctCongestionDiscard = metrics.PctCongestionDiscard
+#          .PctDiscard = metrics.PctDiscard
+#          .PostPolicyBitRate = metrics.PostPolicyBitRate
+#          .PostPolicyBits = metrics.PostPolicyBits
+#          .PostPolicyBytes = metrics.PostPolicyBytes
+#          .PostPolicyPackets = metrics.PostPolicyPackets
+#          .PostPolicyThroughput = metrics.PostPolicyThroughput
+#          .PostPolicyUtilization = metrics.PostPolicyUtilization
+#          .PrePolicyBitRate = metrics.PrePolicyBitRate
+#          .PrePolicyBits = metrics.PrePolicyBits
+#          .PrePolicyBytes = metrics.PrePolicyBytes
+#          .PrePolicyPackets = metrics.PrePolicyPackets
+#          .PrePolicyThroughput = metrics.PrePolicyThroughput
+#          .PrePolicyUtilization = metrics.PrePolicyUtilization
+#          .PriorityEnabled = metrics.PriorityEnabled
+#          .QoSMechanismDiscardedBits = metrics.QoSMechanismDiscardedBits
+#          .QoSMechanismDiscardedBytes = metrics.QoSMechanismDiscardedBytes
+#          .QoSMechanismDiscardedPackets = metrics.QoSMechanismDiscardedPackets
+#      } else if .metricFamily == "NormalizedVirtualMemoryInfo" {
+#          .Free = metrics.Free
+#          .SWAPFree = metrics.SWAPFree
+#          .SWAPTotal = metrics.SWAPTotal
+#          .SWAPUsed = metrics.SWAPUsed
+#          .SWAPUtilization = metrics.SWAPUtilization
+#          .Total = metrics.Total
+#          .Used = metrics.Used
+#          .Utilization = metrics.Utilization
+#      }
+#      if exists(.ifAlias) {
+#          .ifAlias = replace!(.ifAlias, " ", "_")
+#          .ifAlias = replace(.ifAlias, "|", "")
+#          .ifAlias = replace(.ifAlias, "__", "_")
+#      }
+#      if exists(.ifDescr) {
+#          .ifDescr = replace!(.ifDescr, " ", "_")
+#          .ifDescr = replace(.ifDescr, "-", "_")
+#          .ifDescr = replace(.ifDescr, "__", "_")
+#          .ifDescr = replace(.ifDescr, ":", "_")
+#      }
+
+  log_route:
+    type: route
+    reroute_unmatched: true
+    inputs:
+      - initial_log_parse
+    route:
+      NormalizedPortInfo: .metricFamily == "NormalizedPortInfo"
+#      NormalizedMemoryInfo: .metricFamily == "NormalizedMemoryInfo"
+#      NormalizedCPUInfo: .metricFamily == "NormalizedCPUInfo"
+#      NormalizedReachabilityInfo: .metricFamily == "NormalizedReachabilityInfo"
+#      NormalizedAvailabilityInfo: .metricFamily == "NormalizedAvailabilityInfo"
+#      NormalizedPartitionsInfo: .metricFamily == "NormalizedPartitionsInfo"
+#      NormalizedQosClassMapInfo: .metricFamily == "NormalizedQosClassMapInfo"
+#      NormalizedVirtualMemoryInfo: .metricFamily == "NormalizedVirtualMemoryInfo"
+
+#  normalized_virtual_memory_info_metric:
+#    inputs:
+#      - log_route.NormalizedVirtualMemoryInfo
+#    type: log_to_metric
+#    metrics:
+#      - type: gauge
+#        field: .Free
+#        name: bpc_snmppoll_free
+#        tags:
+#          deviceIPAddress: "{{deviceIPAddress}}"
+#          deviceName: "{{deviceName}}"
+#          ifAlias: "{{ifAlias}}"
+#          ifDescr: "{{ifDescr}}"
+#      - type: gauge
+#        field: .SWAPFree
+#        name: bpc_snmppoll_swap_free
+#        tags:
+#          deviceIPAddress: "{{deviceIPAddress}}"
+#          deviceName: "{{deviceName}}"
+#          ifAlias: "{{ifAlias}}"
+#          ifDescr: "{{ifDescr}}"
+#      - type: gauge
+#        field: .SWAPTotal
+#        name: bpc_snmppoll_swap_total
+#        tags:
+#          deviceIPAddress: "{{deviceIPAddress}}"
+#          deviceName: "{{deviceName}}"
+#          ifAlias: "{{ifAlias}}"
+#          ifDescr: "{{ifDescr}}"
+#      - type: gauge
+#        field: .SWAPUsed
+#        name: bpc_snmppoll_swap_used
+#        tags:
+#          deviceIPAddress: "{{deviceIPAddress}}"
+#          deviceName: "{{deviceName}}"
+#          ifAlias: "{{ifAlias}}"
+#          ifDescr: "{{ifDescr}}"
+#      - type: gauge
+#        field: .SWAPUtilization
+#        name: bpc_snmppoll_swap_utilization
+#        tags:
+#          deviceIPAddress: "{{deviceIPAddress}}"
+#          deviceName: "{{deviceName}}"
+#          ifAlias: "{{ifAlias}}"
+#          ifDescr: "{{ifDescr}}"
+#      - type: gauge
+#        field: .Total
+#        name: bpc_snmppoll_total
+#        tags:
+#          deviceIPAddress: "{{deviceIPAddress}}"
+#          deviceName: "{{deviceName}}"
+#          ifAlias: "{{ifAlias}}"
+#          ifDescr: "{{ifDescr}}"
+#      - type: gauge
+#        field: .Used
+#        name: bpc_snmppoll_used
+#        tags:
+#          deviceIPAddress: "{{deviceIPAddress}}"
+#          deviceName: "{{deviceName}}"
+#          ifAlias: "{{ifAlias}}"
+#          ifDescr: "{{ifDescr}}"
+#      - type: gauge
+#        field: .Utilization
+#        name: bpc_snmppoll_utilization
+#        tags:
+#          deviceIPAddress: "{{deviceIPAddress}}"
+#          deviceName: "{{deviceName}}"
+#          ifAlias: "{{ifAlias}}"
+#          ifDescr: "{{ifDescr}}"
+
+  normalized_port_info_metric:
+    inputs:
+      - log_route.NormalizedPortInfo
+    type: log_to_metric
+    metrics:
+      - type: gauge
+        field: .availability
+        name: bpc_snmppoll_availability
+#        tags:
+#          deviceIPAddress: "{{deviceIPAddress}}"
+#          deviceName: "{{deviceName}}"
+#          ifAlias: "{{ifAlias}}"
+#          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .bitsIn
+        name: bpc_snmppoll_bits_in
+#        tags:
+#          deviceIPAddress: "{{deviceIPAddress}}"
+#          deviceName: "{{deviceName}}"
+#          ifAlias: "{{ifAlias}}"
+#          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .bitsPerSecondIn
+        name: bpc_snmppoll_bits_per_second_in
+#        tags:
+#          deviceIPAddress: "{{deviceIPAddress}}"
+#          deviceName: "{{deviceName}}"
+#          ifAlias: "{{ifAlias}}"
+#          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .bitsOut
+        name: bpc_snmppoll_bits_out
+#        tags:
+#          deviceIPAddress: "{{deviceIPAddress}}"
+#          deviceName: "{{deviceName}}"
+#          ifAlias: "{{ifAlias}}"
+#          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .bitsPerSecondOut
+        name: bpc_snmppoll_bits_per_second_out
+#        tags:
+#          deviceIPAddress: "{{deviceIPAddress}}"
+#          deviceName: "{{deviceName}}"
+#          ifAlias: "{{ifAlias}}"
+#          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .utilizationIn
+        name: bpc_snmppoll_utilization_in
+#        tags:
+#          deviceIPAddress: "{{deviceIPAddress}}"
+#          deviceName: "{{deviceName}}"
+#          ifAlias: "{{ifAlias}}"
+#          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .utilizationOut
+        name: bpc_snmppoll_utilization_out
+#        tags:
+#          deviceIPAddress: "{{deviceIPAddress}}"
+#          deviceName: "{{deviceName}}"
+#          ifAlias: "{{ifAlias}}"
+#          ifDescr: "{{ifDescr}}"
+
+sinks:
+  debug:
+    type: console
+    inputs:
+      #- initial_log_parse
+      - log_route._unmatched
+      - log_route.NormalizedPortInfo
+    encoding:
+      codec: json
+
+  prometheus_exporter:
+    type: prometheus_exporter
+    inputs:
+#      - normalized_virtual_memory_info_metric
+      - normalized_port_info_metric
+    address: 0.0.0.0:9090
