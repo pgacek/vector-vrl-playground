@@ -1,6 +1,9 @@
 volumes:
   prometheus_data: {}
 
+networks:
+  backend:
+
 services:
   vector:
     image: timberio/vector:nightly-debian
@@ -11,7 +14,8 @@ services:
     volumes:
       - ./vector/vector.yaml:/etc/vector/vector.yaml:ro
       - ./vector/logs:/etc/vector/logs/:rw
-    network_mode: "host"
+    networks:
+      - backend
     restart: always
 
   prometheus:
@@ -27,4 +31,6 @@ services:
       - "--web.enable-admin-api"
     ports:
       - "9090:9090"
+    networks:
+      - backend
     restart: always
