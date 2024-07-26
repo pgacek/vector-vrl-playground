@@ -13,13 +13,142 @@ transforms:
     inputs:
       - metrics
     source: |-
-      parsed_json = parse_json!(.message)
+      parsed_message, err = parse_json(.message)
       
-      metrics = parsed_json.metrics
-      metricFamily = parsed_json.metricFamily
+      metricFamily = parsed_message.metricFamily
+      metrics = parsed_message.metrics
+      .metricFamilyName = metricFamily
       
+      .deviceIp = parsed_message.deviceIPAddress
+      .deviceName = parsed_message.deviceName
+      
+      if exists(parsed_message.ifAlias) {
+          .ifAlias = replace!(parsed_message.ifAlias, " ", "_")   
+          .ifAlias = replace(.ifAlias, "|", "")                  
+          .ifAlias = replace(.ifAlias, "__", "_")                 
+          .ifAlias = replace(.ifAlias, ":", "_")                   
+          .ifAlias = replace(.ifAlias, "-", "_")                   
+          .ifAlias = replace(.ifAlias, "NULL_", "NaN")
+          .ifAlias = replace(.ifAlias, "__", "_")                
+      }
+      if exists(parsed_message.ifDescr) {
+          .ifDescr = replace!(parsed_message.ifDescr, " ", "_")
+          .ifDescr = replace(.ifDescr, "-", "_")                 
+          .ifDescr = replace(.ifDescr, ":", "_")               
+          .ifDescr = replace(.ifDescr, "|", "")
+          .ifDescr = replace(.ifDescr, "NULL_", "NaN")
+          .ifDescr = replace(.ifDescr, "__", "_")                
+      }
+      
+      .ifIndex = if (parsed_message.ifIndex != null) { parsed_message.ifIndex } else { "NaN" }
+      
+      
+      
+      if metricFamily == "NormalizedPortInfo" {
+          .AdminStatusPollable = if (metrics.AdminStatusPollable != null) { metrics.AdminStatusPollable } else { "NaN" }
+          .Availability = if (metrics.Availability != null) { metrics.Availability } else { "NaN" }
+          .Bits = if (metrics.Bits != null) { metrics.Bits } else { "NaN" }
+          .BitsIn = if (metrics.BitsIn != null) { metrics.BitsIn } else { "NaN" }
+          .BitsOut = if (metrics.BitsOut != null) { metrics.BitsOut } else { "NaN" }
+          .BitsPerSecond = if (metrics.BitsPerSecond != null) { metrics.BitsPerSecond } else { "NaN" }
+          .BitsPerSecondIn = if (metrics.BitsPerSecondIn != null) { metrics.BitsPerSecondIn } else { "NaN" }
+          .BitsPerSecondOut = if (metrics.BitsPerSecondOut != null) { metrics.BitsPerSecondOut } else { "NaN" }
+          .Discards = if (metrics.Discards != null) { metrics.Discards } else { "NaN" }
+          .DiscardsIn = if (metrics.DiscardsIn != null) { metrics.DiscardsIn } else { "NaN" }
+          .DiscardsOut = if (metrics.DiscardsOut != null) { metrics.DiscardsOut } else { "NaN" }
+          .Errors = if (metrics.Errors != null) { metrics.Errors } else { "NaN" }
+          .ErrorsIn = if (metrics.ErrorsIn != null) { metrics.ErrorsIn } else { "NaN" }
+          .ErrorsOut = if (metrics.ErrorsOut != null) { metrics.ErrorsOut } else { "NaN" }
+          .FrameSize = if (metrics.FrameSize != null) { metrics.FrameSize } else { "NaN" }
+          .FrameSizeIn = if (metrics.FrameSizeIn != null) { metrics.FrameSizeIn } else { "NaN" }
+          .FrameSizeOut = if (metrics.FrameSizeOut != null) { metrics.FrameSizeOut } else { "NaN" }
+          .Frames = if (metrics.Frames != null) { metrics.Frames } else { "NaN" }
+          .FramesIn = if (metrics.FramesIn != null) { metrics.FramesIn } else { "NaN" }
+          .FramesOut = if (metrics.FramesOut != null) { metrics.FramesOut } else { "NaN" }
+          .HistoricalInterfaceSpeed = if (metrics.HistoricalInterfaceSpeed != null) { metrics.HistoricalInterfaceSpeed } else { "NaN" }
+          .Nonunicast = if (metrics.Nonunicast != null) { metrics.Nonunicast } else { "NaN" }
+          .NonunicastIn = if (metrics.NonunicastIn != null) { metrics.NonunicastIn } else { "NaN" }
+          .NonunicastOut = if (metrics.NonunicastOut != null) { metrics.NonunicastOut } else { "NaN" }
+          .OperStatusPollable = if (metrics.OperStatusPollable != null) { metrics.OperStatusPollable } else { "NaN" }
+          .PctDiscards = if (metrics.PctDiscards != null) { metrics.PctDiscards } else { "NaN" }
+          .PctDiscardsIn = if (metrics.PctDiscardsIn != null) { metrics.PctDiscardsIn } else { "NaN" }
+          .PctDiscardsOut = if (metrics.PctDiscardsOut != null) { metrics.PctDiscardsOut } else { "NaN" }
+          .PctErrors = if (metrics.PctErrors != null) { metrics.PctErrors } else { "NaN" }
+          .PctErrorsIn = if (metrics.PctErrorsIn != null) { metrics.PctErrorsIn } else { "NaN" }
+          .PctErrorsOut = if (metrics.PctErrorsOut != null) { metrics.PctErrorsOut } else { "NaN" }
+          .SpeedIn = if (metrics.SpeedIn != null) { metrics.SpeedIn } else { "NaN" }
+          .SpeedOut = if (metrics.SpeedOut != null) { metrics.SpeedOut } else { "NaN" }
+          .Unicast = if (metrics.Unicast != null) { metrics.Unicast } else { "NaN" }
+          .UnicastIn = if (metrics.UnicastIn != null) { metrics.UnicastIn } else { "NaN" }
+          .UnicastInPerSecond = if (metrics.UnicastInPerSecond != null) { metrics.UnicastInPerSecond } else { "NaN" }
+          .UnicastOut = if (metrics.UnicastOut != null) { metrics.UnicastOut } else { "NaN" }
+          .UnicastOutPerSecond = if (metrics.UnicastOutPerSecond != null) { metrics.UnicastOutPerSecond } else { "NaN" }
+          .UnicastPerSecond = if (metrics.UnicastPerSecond != null) { metrics.UnicastPerSecond } else { "NaN" }
+          .UnknownProtocolPkts = if (metrics.UnknownProtocolPkts != null) { metrics.UnknownProtocolPkts } else { "NaN" }
+          .Utilization = if (metrics.Utilization != null) { metrics.Utilization } else { "NaN" }
+          .UtilizationIn = if (metrics.UtilizationIn != null) { metrics.UtilizationIn } else { "NaN" }
+          .UtilizationOut = if (metrics.UtilizationOut != null) { metrics.UtilizationOut } else { "NaN" }
+      } else if metricFamily == "NormalizedMemoryInfo" {
+          .CPUMemoryKernelUsage = if (metrics.CPUMemoryKernelUsage != null) { metrics.CPUMemoryKernelUsage } else { "NaN" }
+          .Free = if (metrics.Free != null) { metrics.Free } else { "NaN" }
+          .MemoryCommitted = if (metrics.MemoryCommitted != null) { metrics.MemoryCommitted } else { "NaN" }
+          .Total = if (metrics.Total != null) { metrics.Total } else { "NaN" }
+          .Used = if (metrics.Used != null) { metrics.Used } else { "NaN" }
+          .Utilization = if (metrics.Utilization != null) { metrics.Utilization } else { "NaN" }
+      } else if metricFamily == "NormalizedCPUInfo" {
+          .cpuBusyPercInInterruptCpmCPUMonInterval = if (metrics.cpuBusyPercInInterruptCpmCPUMonInterval != null) { metrics.cpuBusyPercInInterruptCpmCPUMonInterval } else { "NaN" }
+          .cpuBusyPercInLastCpmCPUMonInterval = if (metrics.cpuBusyPercInLastCpmCPUMonInterval != null) { metrics.cpuBusyPercInLastCpmCPUMonInterval } else { "NaN" }
+          .cpuIdleUtilization = if (metrics.cpuIdleUtilization != null) { metrics.cpuIdleUtilization } else { "NaN" }
+          .cpuSystemUtilization = if (metrics.cpuSystemUtilization != null) { metrics.cpuSystemUtilization } else { "NaN" }
+          .cpuUsageMonitoringInterval = if (metrics.cpuUsageMonitoringInterval != null) { metrics.cpuUsageMonitoringInterval } else { "NaN" }
+          .cpuUserUtilization = if (metrics.cpuUserUtilization != null) { metrics.cpuUserUtilization } else { "NaN" }
+          .CPUUtilizationAverage5Seconds = if (metrics.CPUUtilizationAverage5Seconds != null) { metrics.CPUUtilizationAverage5Seconds } else { "NaN" }
+          .CPUUtilizationLastMin = if (metrics.CPUUtilizationLastMin != null) { metrics.CPUUtilizationLastMin } else { "NaN" }
+          .SysCPULoadLast5Minutes = if (metrics.SysCPULoadLast5Minutes != null) { metrics.SysCPULoadLast5Minutes } else { "NaN" }
+          .Utilization = if (metrics.Utilization != null) { metrics.Utilization } else { "NaN" }
+      } else if metricFamily == "NormalizedReachabilityInfo" {
+          .AvgResponse = if (metrics.AvgResponse != null) { metrics.AvgResponse } else { "NaN" }
+          .Reachability = if (metrics.Reachability != null) { metrics.Reachability } else { "NaN" }
+      } else if metricFamily == "NormalizedAvailabilityInfo" {
+          .Availability = if (metrics.Availability != null) { metrics.Availability } else { "NaN" }
+      } else if metricFamily == "NormalizedPartitionsInfo" {
+          .FsCapacity = if (metrics.Capacity != null) { metrics.Capacity } else { "NaN" }
+          .FsFree = if (metrics.Free != null) { metrics.Free } else { "NaN" }
+          .FsPercentFree = if (metrics.PercentFree != null) { metrics.PercentFree } else { "NaN" }
+          .FsPercentUsed = if (metrics.PercentUsed != null) { metrics.PercentUsed } else { "NaN" }
+          .FsUsed = if (metrics.Used != null) { metrics.Used } else { "NaN" }
+      } else if metricFamily == "NormalizedQosClassMapInfo" {
+          .AllocatedBandwidth = if (metrics.AllocatedBandwidth != null) { metrics.AllocatedBandwidth } else { "NaN" }
+          .BandwidthEnabled = if (metrics.BandwidthEnabled != null) { metrics.BandwidthEnabled } else { "NaN" }
+          .BitRateDrops = if (metrics.BitRateDrops != null) { metrics.BitRateDrops } else { "NaN" }
+          .CongestionDiscardedPackets = if (metrics.CongestionDiscardedPackets != null) { metrics.CongestionDiscardedPackets } else { "NaN" }
+          .DiscardedPackets = if (metrics.DiscardedPackets != null) { metrics.DiscardedPackets } else { "NaN" }
+          .DiscardRate = if (metrics.DiscardRate != null) { metrics.DiscardRate } else { "NaN" }
+          .NetworkUtilization = if (metrics.NetworkUtilization != null) { metrics.NetworkUtilization } else { "NaN" }
+          .PctCongestionDiscard = if (metrics.PctCongestionDiscard != null) { metrics.PctCongestionDiscard } else { "NaN" }
+          .PctDiscard = if (metrics.PctDiscard != null) { metrics.PctDiscard } else { "NaN" }
+          .PctQoSMechanismDiscard = if (metrics.PctQoSMechanismDiscard != null) { metrics.PctQoSMechanismDiscard } else { "NaN" }
+          .PostPolicyBitRate = if (metrics.PostPolicyBitRate != null) { metrics.PostPolicyBitRate } else { "NaN" }
+          .PostPolicyBits = if (metrics.PostPolicyBits != null) { metrics.PostPolicyBits } else { "NaN" }
+          .PostPolicyBytes = if (metrics.PostPolicyBytes != null) { metrics.PostPolicyBytes } else { "NaN" }
+          .PostPolicyPackets = if (metrics.PostPolicyPackets != null) { metrics.PostPolicyPackets } else { "NaN" }
+          .PostPolicyThroughput = if (metrics.PostPolicyThroughput != null) { metrics.PostPolicyThroughput } else { "NaN" }
+          .PostPolicyUtilization = if (metrics.PostPolicyUtilization != null) { metrics.PostPolicyUtilization } else { "NaN" }
+          .PrePolicyBitRate = if (metrics.PrePolicyBitRate != null) { metrics.PrePolicyBitRate } else { "NaN" }
+          .PrePolicyBits = if (metrics.PrePolicyBits != null) { metrics.PrePolicyBits } else { "NaN" }
+          .PrePolicyBytes = if (metrics.PrePolicyBytes != null) { metrics.PrePolicyBytes } else { "NaN" }
+          .PrePolicyPackets = if (metrics.PrePolicyPackets != null) { metrics.PrePolicyPackets } else { "NaN" }
+          .PrePolicyThroughput = if (metrics.PrePolicyThroughput != null) { metrics.PrePolicyThroughput } else { "NaN" }
+          .PrePolicyUtilization = if (metrics.PrePolicyUtilization != null) { metrics.PrePolicyUtilization } else { "NaN" }
+          .PriorityEnabled = if (metrics.PriorityEnabled != null) { metrics.PriorityEnabled } else { "NaN" }
+          .QoSMechanismDiscardedBits = if (metrics.QoSMechanismDiscardedBits != null) { metrics.QoSMechanismDiscardedBits } else { "NaN" }
+          .QoSMechanismDiscardedBytes = if (metrics.QoSMechanismDiscardedBytes != null) { metrics.QoSMechanismDiscardedBytes } else { "NaN" }
+          .QoSMechanismDiscardedPackets = if (metrics.QoSMechanismDiscardedPackets != null) { metrics.QoSMechanismDiscardedPackets } else { "NaN" }
+      }
+
       del(.message)
       del(.metrics)
+      del(.topic)
       del(._line)
       del(.componentName)
       del(.cycleTimestampMS)
@@ -39,38 +168,6 @@ transforms:
       del(.tags)
       del(.tenantID)
       del(.version)
-            
-      if metricFamily == "NormalizedPortInfo" {
-          .availability = metrics.Availability
-          .bitsIn = metrics.BitsIn
-          .bitsPerSecondIn = metrics.BitsPerSecondIn
-          .bitsOut = metrics.BitsOut
-          .bitsPerSecondOut = metrics.BitsPerSecondOut
-          .utilizationIn = metrics.UtilizationIn
-          .utilizationOut = metrics.UtilizationOut
-      } else if .metricFamily == "NormalizedMemoryInfo" {
-          .CPUMemoryKernelUsage = metrics.CPUMemoryKernelUsage
-          .Free = metrics.Free
-          .MemoryCommitted = metrics.MemoryCommitted
-          .Total = metrics.Total
-          .Used = metrics.Used
-          .Utilization = metrics.Utilization
-      }
-      if exists(.ifAlias) {
-          .ifAlias = replace!(.ifAlias, " ", "_")
-          .ifAlias = replace(.ifAlias, "|", "")
-          .ifAlias = replace(.ifAlias, "__", "_")
-      }
-      if exists(.ifDescr) {
-          .ifDescr = replace!(.ifDescr, " ", "_")
-          .ifDescr = replace(.ifDescr, "-", "_")
-          .ifDescr = replace(.ifDescr, "__", "_")
-          .ifDescr = replace(.ifDescr, ":", "_")
-      }
-      
-      .metricFamily = metricFamily
-      .ifAlias      = .ifAlias
-      .ifDescr      = .ifDescr
 
   log_route:
     type: route
@@ -78,8 +175,357 @@ transforms:
     inputs:
       - initial_log_parse
     route:
-      NormalizedPortInfo: .metricFamily == "NormalizedPortInfo"
-      NormalizedMemoryInfo: .metricFamily == "NormalizedMemoryInfo"
+      NormalizedPortInfo: .metricFamilyName == "NormalizedPortInfo"
+      NormalizedMemoryInfo: .metricFamilyName == "NormalizedMemoryInfo"
+      NormalizedCPUInfo: .metricFamilyName == "NormalizedCPUInfo"
+      NormalizedReachabilityInfo: .metricFamilyName == "NormalizedReachabilityInfo"
+      NormalizedAvailabilityInfo: .metricFamilyName == "NormalizedAvailabilityInfo"
+      NormalizedPartitionsInfo: .metricFamilyName == "NormalizedPartitionsInfo"
+      NormalizedQosClassMapInfo: .metricFamilyName == "NormalizedQosClassMapInfo"
+
+  normalized_qos_class_map_info:
+    inputs:
+      - log_route.NormalizedQosClassMapInfo
+    type: log_to_metric
+    metrics:
+      - type: gauge
+        field: .AllocatedBandwidth
+        name: bpc_snmppoll_qos_allocated_bandwidth
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .BandwidthEnabled
+        name: bpc_snmppoll_qos_bandwidth_enabled
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .BitRateDrops
+        name: bpc_snmppoll_qos_bit_rate_drops
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .CongestionDiscardedPackets
+        name: bpc_snmppoll_qos_congestion_discarded_packets
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .DiscardedPackets
+        name: bpc_snmppoll_qos_discarded_packets
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .DiscardRate
+        name: bpc_snmppoll_qos_discard_rate
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .NetworkUtilization
+        name: bpc_snmppoll_qos_network_utilization
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .PctCongestionDiscard
+        name: bpc_snmppoll_qos_pct_congestion_discard
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .PctDiscard
+        name: bpc_snmppoll_qos_pct_discard
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .PctQoSMechanismDiscard
+        name: bpc_snmppoll_qos_pct_mechanism_discard
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .PostPolicyBitRate
+        name: bpc_snmppoll_qos_post_policy_bit_rate
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .PostPolicyBits
+        name: bpc_snmppoll_qos_post_policy_bits
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .PostPolicyBytes
+        name: bpc_snmppoll_qos_post_policy_bytes
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .PostPolicyPackets
+        name: bpc_snmppoll_qos_post_policy_packets
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .PostPolicyThroughput
+        name: bpc_snmppoll_qos_post_policy_throughput
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .PostPolicyUtilization
+        name: bpc_snmppoll_qos_post_policy_utilization
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .PrePolicyBitRate
+        name: bpc_snmppoll_qos_pre_policy_bit_rate
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .PrePolicyBits
+        name: bpc_snmppoll_qos_pre_policy_bits
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .PrePolicyBytes
+        name: bpc_snmppoll_qos_pre_policy_bytes
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .PrePolicyPackets
+        name: bpc_snmppoll_qos_pre_policy_packets
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .PrePolicyThroughput
+        name: bpc_snmppoll_qos_pre_policy_throughput
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .PrePolicyUtilization
+        name: bpc_snmppoll_qos_pre_policy_utilization
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .QoSMechanismDiscardedBits
+        name: bpc_snmppoll_qos_mechanism_discarded_bits
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .PriorityEnabled
+        name: bpc_snmppoll_qos_priority_enabled
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .QoSMechanismDiscardedPackets
+        name: bpc_snmppoll_qos_mechanism_discarded_packets
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .QoSMechanismDiscardedBytes
+        name: bpc_snmppoll_qos_mechanism_discarded_bytes
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+
+  normalized_partitions_info:
+    inputs:
+      - log_route.NormalizedPartitionsInfo
+    type: log_to_metric
+    metrics:
+      - type: gauge
+        field: .FsCapacity
+        name: bpc_snmppoll_filesystem_capacity
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          mountPoint: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .FsFree
+        name: bpc_snmppoll_filesystem_free
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          mountPoint: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .FsPercentFree
+        name: bpc_snmppoll_filesystem_percent_free
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          mountPoint: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .FsPercentUsed
+        name: bpc_snmppoll_filesystem_percent_used
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          mountPoint: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .FsUsed
+        name: bpc_snmppoll_filesystem_used
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          mountPoint: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+
+
+  normalized_reachability_info:
+    inputs:
+      - log_route.NormalizedReachabilityInfo
+    type: log_to_metric
+    metrics:
+      - type: gauge
+        field: .AvgResponse
+        name: bpc_snmppoll_reachability_avg_response
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .Reachability
+        name: bpc_snmppoll_reachability
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifIndex: "{{ifIndex}}"
+
+  normalized_availability_info:
+    inputs:
+      - log_route.NormalizedAvailabilityInfo
+    type: log_to_metric
+    metrics:
+      - type: gauge
+        field: .Availability
+        name: bpc_snmppoll_availability
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifIndex: "{{ifIndex}}"
+
+  normalized_cpu_info_metric:
+    inputs:
+      - log_route.NormalizedCPUInfo
+    type: log_to_metric
+    metrics:
+      - type: gauge
+        field: .cpuBusyPercInInterruptCpmCPUMonInterval
+        name: bpc_snmppoll_cpu_busy_perc_in_interrupt_cpmcpumoninterval
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .cpuBusyPercInLastCpmCPUMonInterval
+        name: bpc_snmppoll_cpu_busy_perc_in_last_cpmcpumoninterval
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .cpuIdleUtilization
+        name: bpc_snmppoll_cpu_idle_utilization
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .cpuSystemUtilization
+        name: bpc_snmppoll_cpu_system_utilization
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .cpuUsageMonitoringInterval
+        name: bpc_snmppoll_cpu_usage_monitoring_interval
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .cpuUserUtilization
+        name: bpc_snmppoll_cpu_user_utilization
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .CPUUtilizationAverage5Seconds
+        name: bpc_snmppoll_cpu_utilization_average_5seconds
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .CPUUtilizationLastMin
+        name: bpc_snmppoll_cpu_utilization_lastmin
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .SysCPULoadLast5Minutes
+        name: bpc_snmppoll_cpu_sys_cpu_load_last_5minutes
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
+      - type: gauge
+        field: .Utilization
+        name: bpc_snmppoll_cpu_utilization
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifDescr: "{{ifDescr}}"
 
   normalized_virtual_memory_info_metric:
     inputs:
@@ -89,24 +535,57 @@ transforms:
       - type: gauge
         field: .CPUMemoryKernelUsage
         name: bpc_snmppoll_cpu_memory_kernel_usage
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
       - type: gauge
         field: .MemoryCommitted
         name: bpc_snmppoll_memory_committed
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
       - type: gauge
         field: .Free
-        name: bpc_snmppoll_free
+        name: bpc_snmppoll_memory_free
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
       - type: gauge
         field: .Total
-        name: bpc_snmppoll_total
+        name: bpc_snmppoll_memory_total
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
       - type: gauge
         field: .Used
-        name: bpc_snmppoll_used
-      - type: gauge
-        field: .Total
-        name: bpc_snmppoll_total
+        name: bpc_snmppoll_memory_used
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
       - type: gauge
         field: .Utilization
-        name: bpc_snmppoll_utilization
+        name: bpc_snmppoll_memory_utilization
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
 
   normalized_port_info_metric:
     inputs:
@@ -114,40 +593,398 @@ transforms:
     type: log_to_metric
     metrics:
       - type: gauge
-        field: .availability
-        name: bpc_snmppoll_availability
-
+        field: .Availability
+        name: bpc_snmppoll_port_availability
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
       - type: gauge
-        field: .bitsIn
-        name: bpc_snmppoll_bits_in
-
+        field: .AdminStatusPollable
+        name: bpc_snmppoll_port_admin_status_pollable
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
       - type: gauge
-        field: .bitsPerSecondIn
-        name: bpc_snmppoll_bits_per_second_in
-
+        field: .Bits
+        name: bpc_snmppoll_port_bits
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
       - type: gauge
-        field: .bitsOut
-        name: bpc_snmppoll_bits_out
-
+        field: .BitsIn
+        name: bpc_snmppoll_port_bits_in
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
       - type: gauge
-        field: .bitsPerSecondOut
-        name: bpc_snmppoll_bits_per_second_out
-
+        field: .BitsOut
+        name: bpc_snmppoll_port_bits_out
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
       - type: gauge
-        field: .utilizationIn
-        name: bpc_snmppoll_utilization_in
-
+        field: .BitsPerSecond
+        name: bpc_snmppoll_port_bits_per_second
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
       - type: gauge
-        field: .utilizationOut
-        name: bpc_snmppoll_utilization_out
-
+        field: .BitsPerSecondIn
+        name: bpc_snmppoll_port_bits_per_second_in
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .BitsPerSecondOut
+        name: bpc_snmppoll_port_bits_per_secondout
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .Discards
+        name: bpc_snmppoll_port_discards
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .DiscardsIn
+        name: bpc_snmppoll_port_discards_in
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .DiscardsOut
+        name: bpc_snmppoll_port_discards_out
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .Errors
+        name: bpc_snmppoll_port_errors
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .ErrorsIn
+        name: bpc_snmppoll_port_errors_in
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .ErrorsOut
+        name: bpc_snmppoll_port_errors_out
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .FrameSize
+        name: bpc_snmppoll_port_frame_size
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .FrameSizeIn
+        name: bpc_snmppoll_port_frame_size_in
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .FrameSizeOut
+        name: bpc_snmppoll_port_frame_size_out
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .Frames
+        name: bpc_snmppoll_port_frames
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .FramesIn
+        name: bpc_snmppoll_port_frames_in
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .FramesOut
+        name: bpc_snmppoll_port_frames_out
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .HistoricalInterfaceSpeed
+        name: bpc_snmppoll_port_historical_interface_speed
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .Nonunicast
+        name: bpc_snmppoll_port_non_unicast
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .NonunicastIn
+        name: bpc_snmppoll_port_non_unicast_in
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .NonunicastOut
+        name: bpc_snmppoll_port_non_unicast_out
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .OperStatusPollable
+        name: bpc_snmppoll_port_oper_status_pollable
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .PctDiscards
+        name: bpc_snmppoll_port_pct_discards
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .PctDiscardsIn
+        name: bpc_snmppoll_port_pct_discards_in
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .PctDiscardsOut
+        name: bpc_snmppoll_port_pct_discards_out
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .PctErrors
+        name: bpc_snmppoll_port_pct_errors
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .PctErrorsIn
+        name: bpc_snmppoll_port_pct_errors_in
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .PctErrorsOut
+        name: bpc_snmppoll_port_pct_errors_out
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .SpeedIn
+        name: bpc_snmppoll_port_speed_in
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .SpeedOut
+        name: bpc_snmppoll_port_speed_out
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .Unicast
+        name: bpc_snmppoll_port_unicast
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .UnicastIn
+        name: bpc_snmppoll_port_unicast_in
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .UnicastInPerSecond
+        name: bpc_snmppoll_port_unicast_in_per_second
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .UnicastOut
+        name: bpc_snmppoll_port_unicast_out
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .UnicastOutPerSecond
+        name: bpc_snmppoll_port_unicast_out_per_second
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .UnicastPerSecond
+        name: bpc_snmppoll_port_unicast_per_second
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .UnknownProtocolPkts
+        name: bpc_snmppoll_port_unknown_protocol_pkts
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .Utilization
+        name: bpc_snmppoll_port_utilization
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .UtilizationIn
+        name: bpc_snmppoll_port_utilization_in
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
+      - type: gauge
+        field: .UtilizationOut
+        name: bpc_snmppoll_port_utilization_out
+        tags:
+          deviceIp: "{{deviceIp}}"
+          deviceName: "{{deviceName}}"
+          ifAlias: "{{ifAlias}}"
+          ifDescr: "{{ifDescr}}"
+          ifIndex: "{{ifIndex}}"
 
 sinks:
   debug:
     type: console
     inputs:
-      - log_route.NormalizedMemoryInfo
-      - log_route.NormalizedPortInfo
+      - initial_log_parse
     encoding:
       codec: json
 
@@ -156,4 +993,9 @@ sinks:
     inputs:
       - normalized_virtual_memory_info_metric
       - normalized_port_info_metric
+      - normalized_availability_info
+      - normalized_reachability_info
+      - normalized_cpu_info_metric
+      - normalized_partitions_info
+      - normalized_qos_class_map_info
     address: 0.0.0.0:9095
